@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+	    <record model="ir.ui.view" id="aws_sns_messages_tree">
+      <field name="name">aws.aws_sns_messages_tree</field>
+      <field name="model">aws.sns_messages</field>
+      <field name="arch" type="xml">
+        <tree string="AWS sns Messages" >
+          <field name="messageid"/>
+          <field name="type"/>
+          <field name="subject"/>
+          <field name="message"/>
+          <field name="topicarn"/>
+        </tree>
+      </field>
+    </record>        
+		<record model="ir.actions.act_window" id="aws_sns_messages_action">
+			<field name="name">AWS Messages</field>
+			<field name="res_model">aws.sns_messages</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem id="aws_messages_menu" name="AWS Messages" parent="lubon_qlan.lubon_qlan_tables_menu"
+			action="aws_sns_messages_action"/>
+	</data>
+</openerp>
