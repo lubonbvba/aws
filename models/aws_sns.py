@@ -17,7 +17,6 @@ class aws_sns_messages(models.Model):
 
 	@api.multi
 	def receive_sns(self,content):
-		#pdb.set_trace()
 		if not (self.search([('messageid','=',content['MessageId'])])):
 			message=self.create({
 				'messageid': content['MessageId'],
