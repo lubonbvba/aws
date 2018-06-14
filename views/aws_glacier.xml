@@ -9,8 +9,8 @@
           <field name="name"/>
           <field name="arn"/>
           <field name="last_inventory_date"/>
-          <field name="number_of_archives"/>
-          <field name="size_in_gb"/>
+          <field name="number_of_archives" sum="Total archives"/>
+          <field name="size_in_gb" sum="Total size"/>
         </tree>
       </field>
     </record>
@@ -21,6 +21,8 @@
         <form string="AWS glacier vaults">
         <header>
           <button type='object' string='Refresh list' name='list_vaults'/>
+          <button type='object' string='Inventory' name='inventory_vault'/>
+          <button type='object' string='List Jobs' name='list_vault_jobs'/>
         </header>
         <sheet>
           <group>
@@ -30,6 +32,30 @@
             <field name="number_of_archives"/>
             <field name="size_in_gb"/>
           </group>
+          <notebook>
+            <page string="Archives">
+              <field name="archive_ids">
+                <tree>
+                  <field name="vault_id" invisible='1'/>
+                  <field name="archiveid"/>
+                  <field name="name"/>
+                  <field name="size"/>
+                  <field name="creationdate"/>
+                </tree>
+              </field>
+            </page>
+            <page string="Jobs">
+              <field name="job_ids">
+                 <tree>
+                  <field name="vault_id" invisible='1'/>
+                  <field name="jobid"/>
+                  <field name="action"/>
+                  <field name="status"/>
+                  <button name="getjobresult" type="object" string='Get'/>
+                </tree>
+              </field>
+            </page>
+          </notebook>
         </sheet>
         </form>
       </field>
