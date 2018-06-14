@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+    <menuitem id="aws_config_menu" name="AWS Configuration" parent="base.menu_custom" sequence="80"/>
+	</data>
+</openerp>

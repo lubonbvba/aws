@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+	    <record model="ir.ui.view" id="aws_glacier_vaults_tree">
+      <field name="name">aws.aws_glacier_vaults_tree</field>
+      <field name="model">aws.glacier_vaults</field>
+      <field name="arch" type="xml">
+        <tree string="AWS glacier vaults" >
+          <field name="name"/>
+          <field name="arn"/>
+          <field name="last_inventory_date"/>
+          <field name="number_of_archives"/>
+          <field name="size_in_gb"/>
+        </tree>
+      </field>
+    </record>
+<record model="ir.ui.view" id="aws_glacier_vaults_form">
+      <field name="name">aws.aws_glacier_vaults_form</field>
+      <field name="model">aws.glacier_vaults</field>
+      <field name="arch" type="xml">
+        <form string="AWS glacier vaults">
+        <header>
+          <button type='object' string='Refresh list' name='list_vaults'/>
+        </header>
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="arn"/>
+            <field name="last_inventory_date"/>
+            <field name="number_of_archives"/>
+            <field name="size_in_gb"/>
+          </group>
+        </sheet>
+        </form>
+      </field>
+    </record> 
+		<record model="ir.actions.act_window" id="aws_glacier_vaults_action">
+			<field name="name">AWS Glacier vaults</field>
+			<field name="res_model">aws.glacier_vaults</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem id="aws_glacier_vaults_menu" name="AWS Glacier vaults" parent="aws_config_menu"
+			action="aws_glacier_vaults_action"/>
+	</data>
+</openerp>
