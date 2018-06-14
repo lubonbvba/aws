@@ -10,7 +10,7 @@ class Aws(http.Controller):
 		s=json.loads(data)
 		#pdb.set_trace()
 
-		request.env['aws.sns_messages'].sudo().receive_sns(s)
+		request.env['aws.sns_messages'].sudo().receive_sns(s,data)
 		return "OK"
 
 
