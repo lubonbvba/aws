@@ -20,7 +20,7 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
-		<menuitem id="aws_messages_menu" name="AWS Messages" parent="lubon_qlan.lubon_qlan_tables_menu"
+		<menuitem id="aws_messages_menu" name="AWS Messages" parent="aws_config_menu"
 			action="aws_sns_messages_action"/>
 	</data>
 </openerp>

@@ -26,7 +26,9 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/aws.xml',
         'views/aws_sns.xml',
+        'views/aws_glacier.xml',
         'templates.xml',
     ],
     # only loaded in demonstration mode
