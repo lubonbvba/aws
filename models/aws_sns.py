@@ -16,6 +16,7 @@ class aws_sns_messages(models.Model):
 	topicarn= fields.Char()
 	subject= fields.Char()
 	message= fields.Char()
+	fulldata= fields.Char()
 
 
 	@api.multi
@@ -26,6 +27,14 @@ class aws_sns_messages(models.Model):
 				'messageid': content['MessageId'],
 				'type': content['Type'],
 				'message': content['Message'],
-				'subject': content['Subject'],
 				'topicarn': content['TopicArn'],
 				})
+			if 'Subject' in content.keys():
+				message.update({
+ 					'subject': content['Subject'],
+					})
+			message.update({
+				'fulldata': stringcontent,
+				})
+		else:
+			logger.info("Message allready received: ID: %s" % content['MessageId'])

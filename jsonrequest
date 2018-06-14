@@ -1,8 +1,8 @@
 {
   "Type" : "Notification",
-  "MessageId" : "z1da41e39f-ea4d-435a-b922-c6aae3915ebe",
+  "MessageId" : "z2da41e39f-ea4d-435a-b922-c6aae3915ebe",
   "TopicArn" : "arn:aws:sns:us-west-2:123456789012:MyTopic",
-  "Subject" : "test",
+  "sSubject" : "test",
   "Message" : "test message",
   "Timestamp" : "2012-04-25T21:49:25.719Z",
   "SignatureVersion" : "1",
