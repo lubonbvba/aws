@@ -1,26 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>
-	    <record model="ir.ui.view" id="aws_sns_messages_tree">
-      <field name="name">aws.aws_sns_messages_tree</field>
-      <field name="model">aws.sns_messages</field>
-      <field name="arch" type="xml">
-        <tree string="AWS sns Messages" >
-          <field name="messageid"/>
-          <field name="type"/>
-          <field name="subject"/>
-          <field name="message"/>
-          <field name="topicarn"/>
-        </tree>
-      </field>
-    </record>        
+		<record model="ir.ui.view" id="aws_sns_topics_tree">
+			<field name="name">aws.aws_sns_topics_tree</field>
+			<field name="model">aws.sns_topics</field>
+			<field name="arch" type="xml">
+				<tree string="AWS SNS Topics" >
+					<field name="topicarn"/>
+				</tree>
+			</field>
+		</record>        
+		<record model="ir.ui.view" id="aws_sns_topics_form">
+			<field name="name">aws.aws_sns_topics_form</field>
+			<field name="model">aws.sns_topics</field>
+			<field name="arch" type="xml">
+				<form string="AWS SNS Topics" >
+					<sheet>
+						<group>
+							<field name="topicarn"/>
+							<field name="subscribe_url"/>
+							<field name="unsubscribe_url"/>
+							<field name="model_id"/>
+							<field name="subscription_result"/>
+						</group>
+						<notebook>
+							<page string='Received'>
+								<field name="aws_sns_messages_ids"/>
+							</page>
+						</notebook>
+						<div class="oe_chatter">
+							<field name="message_follower_ids" widget="mail_followers"/>
+							<field name="message_ids" widget="mail_thread"/>
+						</div>          
+					</sheet>
+				</form>
+			</field>
+		</record>        
+
+		<record model="ir.ui.view" id="aws_sns_messages_tree">
+			<field name="name">aws.aws_sns_messages_tree</field>
+			<field name="model">aws.sns_messages</field>
+			<field name="arch" type="xml">
+				<tree string="AWS sns Messages" >
+					<field name="messageid"/>
+					<field name="type"/>
+					<field name="timestamp"/>
+					<field name="subject"/>
+					<field name="message"/>
+					<field name="topicarn"/>
+					<field name="processed"/>
+				</tree>
+			</field>
+		</record>        
+		<record model="ir.ui.view" id="aws_sns_messages_form">
+			<field name="name">aws.aws_sns_messages_form</field>
+			<field name="model">aws.sns_messages</field>
+			<field name="arch" type="xml">
+				<form string="AWS sns Messages" >
+					<sheet>
+						<group>
+							<group>
+								<field name="messageid"/>
+								<field name="type"/>
+								<field name="timestamp"/>
+								<field name="subject"/>
+							</group>
+							<group>
+								<field name="topicarn"/>
+								<field name="processed"/>
+							</group>
+							<field name="message"/>
+							<field name="fulldata"/>
+							<field name="process_result"/>
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>        
+
+		<record model="ir.actions.act_window" id="aws_sns_topics_action">
+			<field name="name">AWS Topics</field>
+			<field name="res_model">aws.sns_topics</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
 		<record model="ir.actions.act_window" id="aws_sns_messages_action">
 			<field name="name">AWS Messages</field>
 			<field name="res_model">aws.sns_messages</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
-		<menuitem id="aws_messages_menu" name="AWS Messages" parent="aws_config_menu"
-			action="aws_sns_messages_action"/>
-	</data>
-</openerp>
+		<menuitem id="aws_sns_topics_menu" name="AWS Topics" parent="aws_config_menu"
+			action="aws_sns_topics_action"/>
+			<menuitem id="aws_messages_menu" name="AWS Messages" parent="aws_config_menu"
+				action="aws_sns_messages_action"/>
+			</data>
+		</openerp>

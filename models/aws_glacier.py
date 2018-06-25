@@ -88,13 +88,29 @@ class aws_glacier_vault_jobs(models.Model):
 		})
 	@api.multi
 	def getjobresult(self):
+
 		response = boto3.client("glacier").get_job_output(
     		vaultName=self.vault_id.name,
     		jobId=self.jobid,
 			)
 		r=json.loads(response['body'].read())
 		for archive in r['ArchiveList']:
-			self.env['aws.glacier_vault_archives'].checkarchive(self.vault_id,archive)	
+			self.env['aws.glacier_vault_archives'].checkarchive(self.vault_id,archive)
+	@api.multi
+	def process_sns(self,message):
+		if message.type =="Notification":
+			content=json.loads(message.message)
+			if 'JobId' in content.keys():
+				job=self.env['aws.glacier_vault_jobs'].search([('jobid','=',content['JobId'])])
+				if not job:
+					job=self.create({
+							'vault_id':self.env['aws.glacier_vaults'].search([('arn','=', content['VaultARN'])]).id,
+							'jobid':content['JobId'] 
+						})
+			job.vault_id.list_vault_jobs()
+			if job.status=="Succeeded":
+				job.getjobresult()
+
 
 class aws_glacier_vault_archives(models.Model):
 	_name = 'aws.glacier_vault_archives'
@@ -103,6 +119,7 @@ class aws_glacier_vault_archives(models.Model):
 	name = fields.Char()
 	creationdate = fields.Char()
 	size=fields.Integer()
+	archivedescription=fields.Char()
 	@api.multi
 	def checkarchive(self,vault,archive):
 		#pdb.set_trace()
@@ -115,6 +132,7 @@ class aws_glacier_vault_archives(models.Model):
 					'name': desc['Path'],
 					'creationdate': archive['CreationDate'],
 					'size': archive['Size']/(1024*1024*1024),
+					'archivedescription': desc,
 					})
 			except:
 				pdb.set_trace()

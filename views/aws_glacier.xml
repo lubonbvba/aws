@@ -14,6 +14,34 @@
         </tree>
       </field>
     </record>
+<record model="ir.ui.view" id="aws_glacier_vault_archives_form">
+      <field name="name">aws.aws_glacier_vault_archives_form</field>
+      <field name="model">aws.glacier_vault_archives</field>
+      <field name="arch" type="xml">
+        <form string="AWS glacier vaults">
+        <header>
+          <button type='object' string='Refresh' name='list_vaults'/>
+          <button type='object' string='Remove/Delete' name='inventory_vault'/>
+        </header>
+        <sheet>
+          <group>
+          <group>
+            <field name="archiveid"/>
+            <field name="name"/>
+          </group>
+          <group>
+            <field name="size"/>
+            <field name="creationdate"/>
+          </group>
+          <field name="archivedescription"/>
+        </group>
+  </sheet>
+</form>
+</field>
+</record>
+
+
+
 <record model="ir.ui.view" id="aws_glacier_vaults_form">
       <field name="name">aws.aws_glacier_vaults_form</field>
       <field name="model">aws.glacier_vaults</field>
