@@ -71,6 +71,7 @@
 							</group>
 							<group>
 								<field name="topicarn"/>
+								<field name="topic_id"/>
 								<field name="processed"/>
 							</group>
 							<field name="message"/>
