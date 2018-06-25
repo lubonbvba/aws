@@ -59,6 +59,9 @@ class aws_sns_messages(models.Model):
 	process_result=fields.Char(help='Result of the process_sns method executed')
 	processed=fields.Boolean()
 
+	@api.multi
+	def process(self):
+		self.topic_id.execute_sns_method(self)
 
 	@api.multi
 	def receive_sns(self,content,stringcontent=None):

@@ -15,6 +15,7 @@
 			<field name="model">aws.sns_topics</field>
 			<field name="arch" type="xml">
 				<form string="AWS SNS Topics" >
+
 					<sheet>
 						<group>
 							<field name="topicarn"/>
@@ -57,6 +58,9 @@
 			<field name="model">aws.sns_messages</field>
 			<field name="arch" type="xml">
 				<form string="AWS sns Messages" >
+					<header>
+						<button type="object" string='Process' name='process'/>
+					</header>
 					<sheet>
 						<group>
 							<group>

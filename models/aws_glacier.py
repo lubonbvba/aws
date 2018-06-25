@@ -85,10 +85,12 @@ class aws_glacier_vault_jobs(models.Model):
 				})
 		j.update({
 			'status': job['StatusCode'],
+			'action': job['Action'],
 		})
 	@api.multi
 	def getjobresult(self):
-
+		#pdb.set_trace()
+		self.vault_id.archive_ids.unlink()
 		response = boto3.client("glacier").get_job_output(
     		vaultName=self.vault_id.name,
     		jobId=self.jobid,
@@ -105,11 +107,13 @@ class aws_glacier_vault_jobs(models.Model):
 				if not job:
 					job=self.create({
 							'vault_id':self.env['aws.glacier_vaults'].search([('arn','=', content['VaultARN'])]).id,
-							'jobid':content['JobId'] 
+							'jobid':content['JobId'], 
+							'action':content['Action'] 
 						})
 			job.vault_id.list_vault_jobs()
-			if job.status=="Succeeded":
+			if job.action == "InventoryRetrieval" and job.status=="Succeeded":
 				job.getjobresult()
+		#pdb.set_trace()
 
 
 class aws_glacier_vault_archives(models.Model):
