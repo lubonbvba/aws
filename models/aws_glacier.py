@@ -23,6 +23,8 @@ class aws_glacier_vaults(models.Model):
 		logger.info('Start refresh_vault_list')
 		self.list_vaults()
 		logger.info('End refresh_vault_list')
+
+	@api.multi	
 	def refresh_vaults_inventory(self):
 		#function to be scheduled weekly
 		vaults=self.search([('include_in_inventory','=',True)])
