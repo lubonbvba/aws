@@ -18,7 +18,7 @@
     # Check https://github.com/odoo/odoo/blob/master/openerp/addons/base/module/module_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '0.4',
+    'version': '0.5',
 
     # any module necessary for this one to work correctly
     'depends': ['base','mail'],
@@ -26,6 +26,7 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'data/aws_glacier_cron.xml',
         'views/aws.xml',
         'views/aws_sns.xml',
         'views/aws_glacier.xml',

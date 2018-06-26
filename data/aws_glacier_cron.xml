@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+        <record id="ir_cron_aws_refresh_vault_list" model="ir.cron">
+            <field name="name">Refresh AWS glacier vault list</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model">aws.glacier_vaults</field>
+            <field name="function">refresh_vault_list</field>
+            <field name="args"></field>
+            <field name="active" eval="False"/>
+        </record>
+        <record id="ir_cron_aws_refresh_vaults_inventory" model="ir.cron">
+            <field name="name">Refresh AWS glacier vault inventory</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model">aws.glacier_vaults</field>
+            <field name="function">refresh_vaults_inventory</field>
+            <field name="args"></field>
+            <field name="active" eval="False"/>
+        </record>        
+    </data>
+</openerp>

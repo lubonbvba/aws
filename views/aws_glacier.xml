@@ -11,6 +11,8 @@
           <field name="last_inventory_date"/>
           <field name="number_of_archives" sum="Total archives"/>
           <field name="size_in_gb" sum="Total size"/>
+          <field name="cost_in_usd" sum="Total cost"/>
+          <field name="include_in_inventory"/>
         </tree>
       </field>
     </record>
@@ -39,7 +41,19 @@
 </form>
 </field>
 </record>
-
+<record model="ir.ui.view" id="aws_glacier_vault_archives_tree">
+      <field name="name">aws.aws_glacier_vault_archives_tree</field>
+      <field name="model">aws.glacier_vault_archives</field>
+      <field name="arch" type="xml">
+        <tree string="AWS glacier vaults">
+                  <field name="vault_id" invisible='1'/>
+                  <field name="archiveid" invisible='1'/>
+                  <field name="creationdate"/>
+                  <field name="name"/>
+                  <field name="size"/>
+        </tree>
+      </field>
+</record>
 
 
 <record model="ir.ui.view" id="aws_glacier_vaults_form">
@@ -59,17 +73,12 @@
             <field name="last_inventory_date"/>
             <field name="number_of_archives"/>
             <field name="size_in_gb"/>
+            <field name="cost_in_usd"/>
+            <field name="include_in_inventory"/>
           </group>
           <notebook>
             <page string="Archives">
               <field name="archive_ids">
-                <tree>
-                  <field name="vault_id" invisible='1'/>
-                  <field name="archiveid"/>
-                  <field name="name"/>
-                  <field name="size"/>
-                  <field name="creationdate"/>
-                </tree>
               </field>
             </page>
             <page string="Jobs">

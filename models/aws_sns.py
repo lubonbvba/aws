@@ -47,7 +47,7 @@ class aws_sns_topics(models.Model):
 
 class aws_sns_messages(models.Model):
 	_name = 'aws.sns_messages'
-
+	_order= 'timestamp DESC' 
 	type= fields.Char()
 	messageid= fields.Char()
 	topicarn= fields.Char()

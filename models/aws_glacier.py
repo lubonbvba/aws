@@ -11,13 +11,24 @@ class aws_glacier_vaults(models.Model):
 	arn = fields.Char()
 	number_of_archives = fields.Integer()
 	size_in_gb=fields.Integer()
-	last_inventory_date=fields.Char()
+	last_inventory_date=fields.Datetime()
 	job_ids = fields.One2many('aws.glacier_vault_jobs', 'vault_id')
 	archive_ids = fields.One2many('aws.glacier_vault_archives', 'vault_id')
+	include_in_inventory=fields.Boolean()
+	cost_in_usd=fields.Integer()
 
 	@api.multi
-	def vault_get_job_result(self):
-		pdb.set_trace()
+	def refresh_vault_list(self):
+		#function to be scheduled daily to retrieve the list of vaults	
+		logger.info('Start refresh_vault_list')
+		self.list_vaults()
+		logger.info('End refresh_vault_list')
+	def refresh_vaults_inventory(self):
+		#function to be scheduled weekly
+		vaults=self.search([('include_in_inventory','=',True)])
+		for v in vaults:
+			logger.info('Requesting inventory for %s' % (v.name))
+			v.inventory_vault()
 
 
 	@api.multi
@@ -37,6 +48,7 @@ class aws_glacier_vaults(models.Model):
 	@api.multi
 	def list_vault_jobs(self):
 		g=boto3.client('glacier')
+		self.job_ids.unlink()
 		jobs=g.list_jobs(vaultName=self.name)
 		for job in jobs['JobList']:
 			self.env['aws.glacier_vault_jobs'].checkjob(self,job)
@@ -60,8 +72,10 @@ class aws_glacier_vaults(models.Model):
 					vault.update({
 							'number_of_archives':v['NumberOfArchives'],
 							'size_in_gb':int(v['SizeInBytes']/(1024*1024*1024)),
-							'last_inventory_date':v['LastInventoryDate'],
+							'cost_in_usd':int(v['SizeInBytes']/(1024*1024*1024))*0.004,
+							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
+				vault.list_vault_jobs()	
 			if 'Marker' in vaults.keys():
 				vaults=g.list_vaults(marker=vaults['Marker'])
 			else:
@@ -102,6 +116,8 @@ class aws_glacier_vault_jobs(models.Model):
 	def process_sns(self,message):
 		if message.type =="Notification":
 			content=json.loads(message.message)
+			if 'VaultARN' in content.keys():
+				vault_id=self.env['aws.glacier_vaults'].search([('arn','=', content['VaultARN'])])
 			if 'JobId' in content.keys():
 				job=self.env['aws.glacier_vault_jobs'].search([('jobid','=',content['JobId'])])
 				if not job:
@@ -110,7 +126,6 @@ class aws_glacier_vault_jobs(models.Model):
 							'jobid':content['JobId'], 
 							'action':content['Action'] 
 						})
-			job.vault_id.list_vault_jobs()
 			if job.action == "InventoryRetrieval" and job.status=="Succeeded":
 				job.getjobresult()
 		#pdb.set_trace()
@@ -118,11 +133,12 @@ class aws_glacier_vault_jobs(models.Model):
 
 class aws_glacier_vault_archives(models.Model):
 	_name = 'aws.glacier_vault_archives'
+	_order= 'creationdate DESC'
 	vault_id = fields.Many2one('aws.glacier_vaults')
 	archiveid = fields.Char()
 	name = fields.Char()
-	creationdate = fields.Char()
-	size=fields.Integer()
+	creationdate = fields.Datetime(string='Upload date')
+	size=fields.Integer(string='Size (GB)')
 	archivedescription=fields.Char()
 	@api.multi
 	def checkarchive(self,vault,archive):
@@ -134,7 +150,7 @@ class aws_glacier_vault_archives(models.Model):
 					'vault_id': vault.id,
 					'archiveid': archive['ArchiveId'],
 					'name': desc['Path'],
-					'creationdate': archive['CreationDate'],
+					'creationdate': archive['CreationDate'].replace('T',' '),
 					'size': archive['Size']/(1024*1024*1024),
 					'archivedescription': desc,
 					})
