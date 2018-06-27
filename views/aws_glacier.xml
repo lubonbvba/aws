@@ -45,12 +45,12 @@
       <field name="name">aws.aws_glacier_vault_archives_tree</field>
       <field name="model">aws.glacier_vault_archives</field>
       <field name="arch" type="xml">
-        <tree string="AWS glacier vaults">
+        <tree string="AWS glacier vaults" editable="top">
                   <field name="vault_id" invisible='1'/>
                   <field name="archiveid" invisible='1'/>
-                  <field name="creationdate"/>
-                  <field name="name"/>
-                  <field name="size"/>
+                  <field name="creationdate" readonly='True'/>
+                  <field name="name" readonly='True'/>
+                  <field name="size" readonly='True'/>
         </tree>
       </field>
 </record>

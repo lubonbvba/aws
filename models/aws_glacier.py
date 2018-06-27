@@ -106,20 +106,28 @@ class aws_glacier_vault_jobs(models.Model):
 	@api.multi
 	def getjobresult(self):
 		#pdb.set_trace()
-		self.vault_id.archive_ids.unlink()
+		#self.vault_id.archive_ids.unlink()
+		archives=[]
 		response = boto3.client("glacier").get_job_output(
     		vaultName=self.vault_id.name,
     		jobId=self.jobid,
 			)
 		r=json.loads(response['body'].read())
 		for archive in r['ArchiveList']:
-			self.env['aws.glacier_vault_archives'].checkarchive(self.vault_id,archive)
+			archive=self.env['aws.glacier_vault_archives'].checkarchive(self.vault_id,archive)
+			archives.append(archive.id)
+		obsolete=self.env['aws.glacier_vault_archives'].search([('vault_id','=',self.vault_id.id),('id','not in',archives)])
+		if obsolete:
+			obsolete.unlink()
+
+
 	@api.multi
 	def process_sns(self,message):
 		if message.type =="Notification":
 			content=json.loads(message.message)
 			if 'VaultARN' in content.keys():
 				vault_id=self.env['aws.glacier_vaults'].search([('arn','=', content['VaultARN'])])
+				vault_id.list_vault_jobs()
 			if 'JobId' in content.keys():
 				job=self.env['aws.glacier_vault_jobs'].search([('jobid','=',content['JobId'])])
 				if not job:
@@ -145,10 +153,11 @@ class aws_glacier_vault_archives(models.Model):
 	@api.multi
 	def checkarchive(self,vault,archive):
 		#pdb.set_trace()
-		if not self.search([('archiveid','=',archive['ArchiveId'])]):
-			desc=json.loads(archive['ArchiveDescription'])
+		archive_id=self.search([('archiveid','=',archive['ArchiveId'])])
+		if not archive_id:
+			desc=json.loads(archive['ArchiveDescription'].replace('+AF8',''))
 			try:
-				self.create({
+				archive_id=self.create({
 					'vault_id': vault.id,
 					'archiveid': archive['ArchiveId'],
 					'name': desc['Path'],
@@ -157,4 +166,5 @@ class aws_glacier_vault_archives(models.Model):
 					'archivedescription': desc,
 					})
 			except:
-				pdb.set_trace()
+				logging.error("Unable to process checkarchive")
+		return archive_id
