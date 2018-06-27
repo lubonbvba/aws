@@ -48,6 +48,10 @@ class aws_glacier_vaults(models.Model):
 		self.list_vault_jobs()
 
 	@api.multi
+	def empty_archive_list(self):
+		self.archive_ids.unlink()
+
+	@api.multi
 	def list_vault_jobs(self):
 		g=boto3.client('glacier')
 		self.job_ids.unlink()

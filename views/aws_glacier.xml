@@ -62,9 +62,10 @@
       <field name="arch" type="xml">
         <form string="AWS glacier vaults">
         <header>
-          <button type='object' string='Refresh list' name='list_vaults'/>
+          <button type='object' string='Refresh vault list' name='list_vaults'/>
           <button type='object' string='Inventory' name='inventory_vault'/>
           <button type='object' string='List Jobs' name='list_vault_jobs'/>
+          <button type='object' string='Empty Archive List' name='empty_archive_list'/>
         </header>
         <sheet>
           <group>
