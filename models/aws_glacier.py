@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
 
-from openerp import models, fields, api, exceptions
+from openerp import models, fields, api, exceptions, _
 import boto3,json
 import pdb, logging
 logger = logging.getLogger(__name__)
+from openerp.exceptions import Warning
+
 
 class aws_glacier_vaults(models.Model):
 	_name = 'aws.glacier_vaults'
 	name = fields.Char()
 	arn = fields.Char()
-	number_of_archives = fields.Integer()
+	number_of_archives = fields.Integer(help="Number of archives based upon the vault list")
+	number_of_archives_counted = fields.Integer(compute='_count_archives', help="Number of archives based upon the inventory")
 	size_in_gb=fields.Integer()
 	last_inventory_date=fields.Datetime()
 	job_ids = fields.One2many('aws.glacier_vault_jobs', 'vault_id')
 	archive_ids = fields.One2many('aws.glacier_vault_archives', 'vault_id')
 	include_in_inventory=fields.Boolean()
 	cost_in_usd=fields.Integer()
+
+	@api.depends('archive_ids')
+	@api.one
+	def _count_archives(self):
+		self.number_of_archives_counted=len(self.archive_ids)
 
 	@api.multi
 	def refresh_vault_list(self):
@@ -82,6 +90,8 @@ class aws_glacier_vaults(models.Model):
 							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
 				vault.list_vault_jobs()	
+				if v.number_of_archives != v.number_of_archives_counted:
+					v.inventory_vault() 
 			if 'Marker' in vaults.keys():
 				vaults=g.list_vaults(marker=vaults['Marker'])
 			else:
@@ -113,8 +123,8 @@ class aws_glacier_vault_jobs(models.Model):
 		#self.vault_id.archive_ids.unlink()
 		archives=[]
 		response = boto3.client("glacier").get_job_output(
-    		vaultName=self.vault_id.name,
-    		jobId=self.jobid,
+			vaultName=self.vault_id.name,
+			jobId=self.jobid,
 			)
 		r=json.loads(response['body'].read())
 		for archive in r['ArchiveList']:
@@ -154,6 +164,8 @@ class aws_glacier_vault_archives(models.Model):
 	creationdate = fields.Datetime(string='Upload date')
 	size=fields.Integer(string='Size (GB)')
 	archivedescription=fields.Char()
+	marked_for_delete =fields.Boolean(help='Archive is expired')
+	delete_initiated=fields.Boolean(help="AWS delete requested")
 	@api.multi
 	def checkarchive(self,vault,archive):
 		#pdb.set_trace()
@@ -172,3 +184,17 @@ class aws_glacier_vault_archives(models.Model):
 			except:
 				logging.error("Unable to process checkarchive")
 		return archive_id
+	@api.multi
+	def delete_archive(self):
+		if self.marked_for_delete and not self.delete_initiated:
+			response = boto3.client("glacier").delete_archive(
+					vaultName=self.vault_id.name,
+					archiveId= self.archiveid
+					)
+			if 'ResponseMetadata' in response.keys():
+				if response['ResponseMetadata']['HTTPStatusCode']== 204:
+					self.delete_initiated=True
+				else:	
+					Warning("Response")
+		else:		
+			raise Warning("Not marked for delete or delete allready initiated")

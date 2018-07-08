@@ -10,6 +10,7 @@
           <field name="arn"/>
           <field name="last_inventory_date"/>
           <field name="number_of_archives" sum="Total archives"/>
+          <field name="number_of_archives_counted"/>
           <field name="size_in_gb" sum="Total size"/>
           <field name="cost_in_usd" sum="Total cost"/>
           <field name="include_in_inventory"/>
@@ -50,11 +51,22 @@
                   <field name="archiveid" invisible='1'/>
                   <field name="creationdate" readonly='True'/>
                   <field name="name" readonly='True'/>
-                  <field name="size" readonly='True'/>
+                  <field name="size" readonly='True' sum="Total size"/>
+                  <field name='marked_for_delete' attrs="{'readonly': [('delete_initiated','=', True)]}"/>
+                  <field name='delete_initiated' readonly="1"/>
+                  <!--button name="delete_archive" string='X' type='object' /-->
         </tree>
       </field>
 </record>
-
+<record model="ir.ui.view" id="aws_glacier_vault_archives_search">
+      <field name="name">aws.aws_glacier_vault_archives_search</field>
+      <field name="model">aws.glacier_vault_archives</field>
+      <field name="arch" type="xml">
+        <search>
+          <filter string="Marked for delete" name="marked_for_delete" domain="[('marked_for_delete','=',True)]"/>
+        </search>
+      </field>
+</record>
 
 <record model="ir.ui.view" id="aws_glacier_vaults_form">
       <field name="name">aws.aws_glacier_vaults_form</field>
@@ -73,6 +85,7 @@
             <field name="arn"/>
             <field name="last_inventory_date"/>
             <field name="number_of_archives"/>
+            <field name="number_of_archives_counted"/>
             <field name="size_in_gb"/>
             <field name="cost_in_usd"/>
             <field name="include_in_inventory"/>
@@ -98,13 +111,21 @@
         </form>
       </field>
     </record> 
-		<record model="ir.actions.act_window" id="aws_glacier_vaults_action">
-			<field name="name">AWS Glacier vaults</field>
-			<field name="res_model">aws.glacier_vaults</field>
+    <record model="ir.actions.act_window" id="aws_glacier_vaults_action">
+      <field name="name">AWS Glacier vaults</field>
+      <field name="res_model">aws.glacier_vaults</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="aws_glacier_vaults_menu" name="AWS Glacier vaults" parent="aws_config_menu"
+      action="aws_glacier_vaults_action"/>
+ 		<record model="ir.actions.act_window" id="aws_glacier_archives_action">
+			<field name="name">AWS Glacier archives</field>
+			<field name="res_model">aws.glacier_vault_archives</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
-		<menuitem id="aws_glacier_vaults_menu" name="AWS Glacier vaults" parent="aws_config_menu"
-			action="aws_glacier_vaults_action"/>
+		<menuitem id="aws_glacier_vault_archives_s_menu" name="AWS Glacier archives" parent="aws_config_menu"
+			action="aws_glacier_archives_action"/>
 	</data>
 </openerp>
