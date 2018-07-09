@@ -90,7 +90,7 @@ class aws_glacier_vaults(models.Model):
 							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
 				vault.list_vault_jobs()	
-				if v.number_of_archives != v.number_of_archives_counted:
+				if vault.number_of_archives != vault.number_of_archives_counted:
 					v.inventory_vault() 
 			if 'Marker' in vaults.keys():
 				vaults=g.list_vaults(marker=vaults['Marker'])
