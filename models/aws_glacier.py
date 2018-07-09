@@ -89,9 +89,11 @@ class aws_glacier_vaults(models.Model):
 							'cost_in_usd':int(v['SizeInBytes']/(1024*1024*1024))*0.004,
 							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
-				vault.list_vault_jobs()	
 				if vault.number_of_archives != vault.number_of_archives_counted:
-					v.inventory_vault() 
+					logger.info("Counted archives different from inventory. Performing inventory for %s" % (vault.name))
+					vault.inventory_vault() 
+				vault.list_vault_jobs()	
+	
 			if 'Marker' in vaults.keys():
 				vaults=g.list_vaults(marker=vaults['Marker'])
 			else:
