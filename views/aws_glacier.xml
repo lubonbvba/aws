@@ -65,7 +65,7 @@
 				<search>
 					<field name="name"/>
 					<filter string="Marked for delete" name="marked_for_delete" domain="[('marked_for_delete','=',True)]"/>
-					<filter string="Delete initited" name="delete_initiated" domain="[('delete_initiated','=',True)]"/>
+					<filter string="Delete initiated" name="delete_initiated" domain="[('delete_initiated','=',True)]"/>
 					<group string="Group By">
 					<filter name="by_vault" string="Vault" context="{'group_by': 'vault_id'}"/>
 				</group>
@@ -155,12 +155,29 @@
 			</field>
 		</record>
 
-		<record id="ir_lubon_qlan_add_to_site" model="ir.values">
+		<record id="ir_aws_glacier_vaults_reset_delete_state" model="ir.values">
 			<field eval="'client_action_multi'" name="key2"/>
 			<field eval="'aws.glacier_vault_archives'" name="model"/>
 			<field name="name">Reset marked for delete</field>
 			<field eval="'ir.actions.server,%d'%aws_glacier_vaults_reset_delete_state" name="value"/>
 		</record>
+
+		 <record id="aws_glacier_vaults_mark_for_delete" model="ir.actions.server">
+			<field name="name">Mark for delete</field>
+			<field name="model_id" ref="model_aws_glacier_vault_archives"/>
+			<field name="state">code</field>
+			<field name="code">
+				self.mark_for_delete(cr, uid, context.get('active_ids', []), context)
+			</field>
+		</record>
+
+		<record id="ir_aws_glacier_vaults_mark_for_delete" model="ir.values">
+			<field eval="'client_action_multi'" name="key2"/>
+			<field eval="'aws.glacier_vault_archives'" name="model"/>
+			<field name="name">Mark for delete</field>
+			<field eval="'ir.actions.server,%d'%aws_glacier_vaults_mark_for_delete" name="value"/>
+		</record>
+
 
 
 		<record model="ir.actions.act_window" id="aws_glacier_vaults_action">

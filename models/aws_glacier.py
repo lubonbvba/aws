@@ -216,6 +216,10 @@ class aws_glacier_vault_archives(models.Model):
 			if not a.delete_initiated:
 				a.marked_for_delete=False
 
+	@api.multi
+	def mark_for_delete(self):
+		for a in self:
+			a.marked_for_delete=True
 
 class aws_glacier_vault_archives_delete_wizard(models.TransientModel):
 	_name = 'aws.glacier_vault_archives_delete_wizard'
