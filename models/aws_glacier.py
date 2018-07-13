@@ -5,7 +5,7 @@ import boto3,json
 import pdb, logging
 logger = logging.getLogger(__name__)
 from openerp.exceptions import Warning
-
+from openerp.exceptions import ValidationError
 
 class aws_glacier_vaults(models.Model):
 	_name = 'aws.glacier_vaults'
@@ -72,6 +72,7 @@ class aws_glacier_vaults(models.Model):
 	def list_vaults(self):
 		g=boto3.client('glacier')
 		vaults=g.list_vaults()
+		vaults_found=[]
 		while True: 
 			for v in vaults['VaultList']:
 				vault= self.search([('arn','=',v['VaultARN'])])
@@ -89,16 +90,18 @@ class aws_glacier_vaults(models.Model):
 							'cost_in_usd':int(v['SizeInBytes']/(1024*1024*1024))*0.004,
 							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
-				if vault.number_of_archives != vault.number_of_archives_counted:
-					logger.info("Counted archives different from inventory. Performing inventory for %s" % (vault.name))
-					vault.inventory_vault() 
+#				if vault.number_of_archives != vault.number_of_archives_counted:
+#					logger.info("Counted archives different from inventory. Performing inventory for %s" % (vault.name))
+#					vault.inventory_vault() 
 				vault.list_vault_jobs()	
+				vaults_found.append(vault.id)
 	
 			if 'Marker' in vaults.keys():
 				vaults=g.list_vaults(marker=vaults['Marker'])
 			else:
 				break
-			#pdb.set_trace()	
+		self.env["aws.glacier_vaults"].search([("id","not in",vaults_found)]).unlink()
+		#pdb.set_trace()	
 
 class aws_glacier_vault_jobs(models.Model):
 	_name = 'aws.glacier_vault_jobs'
@@ -106,6 +109,8 @@ class aws_glacier_vault_jobs(models.Model):
 	jobid = fields.Char()
 	status = fields.Char()
 	action = fields.Char()
+	job_created = fields.Datetime()
+	job_completed = fields.Datetime()
 	@api.multi
 	def checkjob(self,vault,job):
 		j=self.search([('vault_id','=',vault.id),('jobid','=',job['JobId'])])
@@ -114,11 +119,14 @@ class aws_glacier_vault_jobs(models.Model):
 				'vault_id': vault.id,
 				'jobid': job['JobId'],
 				'action': job['Action'],
+				'job_created': job['CreationDate'].replace('T',' '),
+				'job_completed': job['CompletionDate'].replace('T',' '),
 				})
 		j.update({
 			'status': job['StatusCode'],
 			'action': job['Action'],
 		})
+		#pdb.set_trace()
 	@api.multi
 	def getjobresult(self):
 		#pdb.set_trace()
@@ -200,3 +208,35 @@ class aws_glacier_vault_archives(models.Model):
 					Warning("Response")
 		else:		
 			raise Warning("Not marked for delete or delete allready initiated")
+
+
+	@api.multi
+	def reset_delete_state(self):
+		for a in self:
+			if not a.delete_initiated:
+				a.marked_for_delete=False
+
+
+class aws_glacier_vault_archives_delete_wizard(models.TransientModel):
+	_name = 'aws.glacier_vault_archives_delete_wizard'
+
+	loaded=fields.Boolean(default=True)
+	twofactor=fields.Char()
+
+	def _set_archives(self):
+		a=self.env['aws.glacier_vault_archives'].search([('marked_for_delete','=',True),('delete_initiated','=',False)])
+		return a
+	glacier_vault_archives_ids=fields.Many2many('aws.glacier_vault_archives', default=_set_archives, relation="aws_glacier_vault_archives_m2m")
+
+
+	#@api.onchange('loaded')
+	#def set_defaults(self):
+	#	pdb.set_trace()
+	@api.one
+	def start_delete(self):
+		if self.env['res.users'].browse(self._context['uid']).check2fa(self.twofactor):
+			for a in self.glacier_vault_archives_ids:
+				a.delete_archive()
+		else:
+			raise ValidationError('Invalid 2fa')
+		

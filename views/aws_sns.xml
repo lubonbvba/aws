@@ -95,9 +95,10 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
-		<menuitem id="aws_sns_topics_menu" name="AWS Topics" parent="aws_config_menu"
+		<menuitem id="aws_sns_menu" name="SNS" parent="aws_config_menu"/>
+		<menuitem id="aws_sns_topics_menu" name="AWS Topics" parent="aws_sns_menu"
 			action="aws_sns_topics_action"/>
-			<menuitem id="aws_messages_menu" name="AWS Messages" parent="aws_config_menu"
+			<menuitem id="aws_messages_menu" name="AWS Messages" parent="aws_sns_menu"
 				action="aws_sns_messages_action"/>
 			</data>
 		</openerp>
