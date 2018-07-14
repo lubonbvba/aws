@@ -120,12 +120,15 @@ class aws_glacier_vault_jobs(models.Model):
 				'jobid': job['JobId'],
 				'action': job['Action'],
 				'job_created': job['CreationDate'].replace('T',' '),
-#				'job_completed': job['CompletionDate'].replace('T',' '),
 				})
 		j.update({
 			'status': job['StatusCode'],
 			'action': job['Action'],
 		})
+		if 'CompletionDate' in job.keys():
+				j.update({
+					'job_completed': job['CompletionDate'].replace('T',' '),
+					})
 
 		#pdb.set_trace()
 	@api.multi
