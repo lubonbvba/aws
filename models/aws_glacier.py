@@ -26,7 +26,7 @@ class aws_glacier_vaults(models.Model):
 		self.number_of_archives_counted=len(self.archive_ids)
 
 	@api.multi
-	def refresh_vault_list(self):
+	def refresh_vault_list(self,dummy=None):
 		#function to be scheduled daily to retrieve the list of vaults	
 		logger.info('Start refresh_vault_list')
 		self.list_vaults()
@@ -90,9 +90,9 @@ class aws_glacier_vaults(models.Model):
 							'cost_in_usd':int(v['SizeInBytes']/(1024*1024*1024))*0.004,
 							'last_inventory_date':v['LastInventoryDate'].replace('T',' '),
 							})
-#				if vault.number_of_archives != vault.number_of_archives_counted:
-#					logger.info("Counted archives different from inventory. Performing inventory for %s" % (vault.name))
-#					vault.inventory_vault() 
+				if vault.number_of_archives != vault.number_of_archives_counted:
+					logger.info("Counted archives different from inventory. Performing inventory for %s" % (vault.name))
+					vault.inventory_vault() 
 				vault.list_vault_jobs()	
 				vaults_found.append(vault.id)
 	
@@ -120,12 +120,13 @@ class aws_glacier_vault_jobs(models.Model):
 				'jobid': job['JobId'],
 				'action': job['Action'],
 				'job_created': job['CreationDate'].replace('T',' '),
-				'job_completed': job['CompletionDate'].replace('T',' '),
+#				'job_completed': job['CompletionDate'].replace('T',' '),
 				})
 		j.update({
 			'status': job['StatusCode'],
 			'action': job['Action'],
 		})
+
 		#pdb.set_trace()
 	@api.multi
 	def getjobresult(self):
