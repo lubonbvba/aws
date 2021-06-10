@@ -67,6 +67,10 @@ class aws_glacier_vaults(models.Model):
 		for job in jobs['JobList']:
 			self.env['aws.glacier_vault_jobs'].checkjob(self,job)
 
+	@api.multi		
+	def process_all_payloads(self):
+		for a in self.archive_ids:
+			a.process_payload()
 
 	@api.multi
 	def list_vaults(self):
@@ -182,7 +186,6 @@ class aws_glacier_vault_archives(models.Model):
 	delete_initiated=fields.Boolean(help="AWS delete requested")
 	@api.multi
 	def checkarchive(self,vault,archive):
-		#pdb.set_trace()
 		archive_id=self.search([('archiveid','=',archive['ArchiveId'])])
 		if not archive_id:
 			desc=json.loads(archive['ArchiveDescription'].replace('+AF8',''))
@@ -213,6 +216,9 @@ class aws_glacier_vault_archives(models.Model):
 		else:		
 			raise Warning("Not marked for delete or delete allready initiated")
 
+	@api.multi
+	def process_payload(self):
+		return self
 
 	@api.multi
 	def reset_delete_state(self):

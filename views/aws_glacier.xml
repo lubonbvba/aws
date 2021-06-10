@@ -83,6 +83,8 @@
 					<button type='object' string='Inventory' name='inventory_vault'/>
 					<button type='object' string='List Jobs' name='list_vault_jobs'/>
 					<button type='object' string='Empty Archive List' name='empty_archive_list'/>
+					<button type='object' string='Process All payloads' name='process_all_payloads'/>
+
 				</header>
 				<sheet>
 					<group>
